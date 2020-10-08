@@ -199,7 +199,7 @@ def manipuate_latent_space(piano_roll, vector_up_t, vector_high_d, vector_up_dow
         draw_two_figure(changed_tensile_reconstruction,changed_diameter_reconstruction,title='changed tension')
 
 
-    return roll_to_pretty_midi(changed_recon_result)
+    return piano_roll, changed_recon_result
 
 
 
