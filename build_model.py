@@ -176,15 +176,15 @@ def manipuate_latent_space(piano_roll, vector_up_t, vector_high_d, vector_up_dow
     diameter_reconstruction = np.squeeze(reconstruction[-1])
 
     # recon_result = result_sampling(np.concatenate(list(reconstruction), axis=-1))[0]
-
+    changed_z = z
     if change_t:
-        changed_z = z + t_up_factor * vector_up_t
+        changed_z += t_up_factor * vector_up_t
 
     if change_d:
-        changed_z = z + d_high_factor * vector_high_d
+        changed_z += d_high_factor * vector_high_d
 
     if change_t_up_down:
-        changed_z = z + t_up_down_factor * vector_up_down_t
+        changed_z += t_up_down_factor * vector_up_down_t
 
     changed_reconstruction = vae.layers[2].predict(changed_z)
 
