@@ -2,6 +2,7 @@ import numpy as np
 from params import *
 import pretty_midi
 import music21
+import copy
 
 
 def result_sampling(rolls):
@@ -29,8 +30,8 @@ def result_sampling(rolls):
 
 
 
-def roll_to_pretty_midi(rolls):
-    pm = pretty_midi.PrettyMIDI(initial_tempo=TEMPO, resolution=100)
+def roll_to_pretty_midi(rolls,pm_old):
+
     melody_notes = []
     bass_notes = []
     step_time = 60 / TEMPO / 4
@@ -39,6 +40,8 @@ def roll_to_pretty_midi(rolls):
     previous_b_pitch = -1
     previous_m_start = False
     previous_b_start = False
+
+
 
     for timestep in range(rolls.shape[0]):
         melody_pitch = np.where(rolls[timestep, :melody_dim] != 0)[0]
@@ -58,7 +61,7 @@ def roll_to_pretty_midi(rolls):
                     if previous_m_start:
                         #                         print(f'melody note is {previous_m_pitch + 36}')
                         m_end_time = timestep * step_time
-                        melody_notes.append(pretty_midi.Note(velocity=100, pitch=previous_m_pitch + 36,
+                        melody_notes.append(pretty_midi.Note(velocity=100, pitch=previous_m_pitch + 24,
                                                              start=m_start_time, end=m_end_time))
                         previous_m_start = False
 
@@ -98,14 +101,23 @@ def roll_to_pretty_midi(rolls):
 
                     previous_b_pitch = bass_pitch
 
-    piano = pretty_midi.Instrument(program=1)
-    piano.notes = melody_notes
-    bass = pretty_midi.Instrument(program=33)
-    bass.notes = bass_notes
-    pm.instruments.append(piano)
-    pm.instruments.append(bass)
+    if pm_old:
+        pm_new = copy.deepcopy(pm_old)
+        pm_new.instruments[0].notes = melody_notes
+        pm_new.instruments[1].notes = bass_notes
+        pm_new.instruments = pm_new.instruments[:2]
+        return pm_new
 
-    return pm
+    else:
+        pm = pretty_midi.PrettyMIDI(initial_tempo=TEMPO)
+        piano = pretty_midi.Instrument(program=1)
+        piano.notes = melody_notes
+        bass = pretty_midi.Instrument(program=33)
+        bass.notes = bass_notes
+        pm.instruments.append(piano)
+        pm.instruments.append(bass)
+
+        return pm
 
 def show_score(pm):
     pm.write('./temp.mid')

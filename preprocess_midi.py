@@ -222,7 +222,7 @@ def preprocess_midi(midi_file):
 
     x,indices = prepare_one_x(roll_concat, filled_indices, down_beat_indices)
 
-    return np.array(x),indices
+    return np.array(x),indices,pm
 
 
 # midi_folder = '/Users/ruiguo/Downloads/dataset/lmd/output_1001'
@@ -246,10 +246,100 @@ def preprocess_midi(midi_file):
 #                 continue
 #             tension_name = tension_name.replace('/home/data/guorui/', '')
 
-def preprocess(midi_file):
-    # file_name = '/Users/ruiguo/Downloads/dataset/lmd/output_1001/A/G/U/TRAGUHD128F92DE226/e6a4afe05f022c891bfe081d4be261db.mid'
-    pianoroll,bar_indices = preprocess_midi(midi_file)
-    return(pianoroll,bar_indices)
+# def four_bar_interate(pianoroll, model, first_vector, second_vector, third_vector):
+#     number_of_iteration = pianoroll
+#     if pianoroll is None:
+#         z = np.random.normal(size=(1, z_dim))
+#     else:
+#         z = model.layers[1].predict(pianoroll)
+#     #     z = z-np.mean(z)
+#
+#
+#     changed_z_up = z + np.random.uniform(5, 7) * vector_up_t
+#
+#     changed_reconstruction_up = vae.layers[2].predict(changed_z_up)
+#
+#     changed_recon_result_up = result_sampling(np.concatenate(list(changed_reconstruction_up), axis=-1))[0]
+#
+#     changed_tensile_reconstruction_up = changed_reconstruction_up[-2]
+#     changed_diameter_reconstruction_up = changed_reconstruction_up[-1]
+#
+#     changed_tensile_up = np.squeeze(changed_tensile_reconstruction_up)
+#     changed_diameter_up = np.squeeze(changed_diameter_reconstruction_up)
+#
+#     #     draw_two_figure(tensile_reconstruction,changed_tensile_up,'original tensile',
+#     #                     'changed tensile','16bar_tensile_up.png','tensile strain','Tension shape going up',
+#     #                     True)
+#
+#     changed_z_down = z - random.uniform(5, 7) * vector_up_t
+#
+#     changed_reconstruction_down = vae.layers[2].predict(changed_z_down)
+#
+#     changed_recon_result_down = result_sampling(np.concatenate(list(changed_reconstruction_down), axis=-1))[0]
+#
+#     changed_tensile_reconstruction_down = changed_reconstruction_down[-2]
+#     changed_diameter_reconstruction_down = changed_reconstruction_down[-1]
+#     changed_tensile_down = np.squeeze(changed_tensile_reconstruction_down)
+#     changed_diameter_down = np.squeeze(changed_diameter_reconstruction_down)
+#
+#     #     draw_two_figure(tensile_reconstruction,changed_tensile_down,'original tensile',
+#     #                     'changed tensile','16bar_tensile_down.png','tensile strain','Tension shape going down',
+#     #                     True)
+#
+#     print(np.concatenate([changed_tensile_up, changed_tensile_down]).shape)
+#
+#     changed_z_high = z + random.uniform(3, 4) * vector_high_d + np.random.uniform(4, 6) * vector_up_t
+#
+#     changed_reconstruction_high = vae.layers[2].predict(changed_z_high)
+#
+#     changed_recon_result_high = result_sampling(np.concatenate(list(changed_reconstruction_high), axis=-1))[0]
+#
+#     changed_tensile_reconstruction_high = changed_reconstruction_high[-2]
+#
+#     changed_diameter_reconstruction_high = changed_reconstruction_high[-1]
+#
+#     changed_tensile_high = np.squeeze(changed_tensile_reconstruction_high)
+#
+#     changed_diameter_high = np.squeeze(changed_diameter_reconstruction_high)
+#
+#     #     draw_two_figure(diameter_reconstruction,changed_diameter_high,'original diameter',
+#     #                     'changed diameter','16bar_diameter_high.png','cloud diameter','Cloud diameter level high',
+#     #                     True)
+#
+#     changed_z_low = z - random.uniform(3, 4) * vector_high_d - np.random.uniform(4, 6) * vector_up_t
+#
+#     changed_reconstruction_low = vae.layers[2].predict(changed_z_low)
+#
+#     changed_recon_result_low = result_sampling(np.concatenate(list(changed_reconstruction_low), axis=-1))[0]
+#
+#     changed_tensile_reconstruction_low = changed_reconstruction_low[-2]
+#
+#     changed_diameter_reconstruction_low = changed_reconstruction_low[-1]
+#     changed_tensile_low = np.squeeze(changed_tensile_reconstruction_low)
+#
+#     changed_diameter_low = np.squeeze(changed_diameter_reconstruction_low)
+#
+#     #     draw_two_figure(diameter_reconstruction,changed_diameter_low,'original diameter',
+#     #                     'changed diameter','16bar_diameter_low.png','cloud diameter','Cloud diameter level low',
+#     #                     True)
+#
+#     result_roll = np.vstack([changed_recon_result_up, changed_recon_result_down,
+#                              changed_recon_result_high, changed_recon_result_low])
+#     all_tensile_connected = np.concatenate([changed_tensile_up,
+#                                             changed_tensile_down,
+#                                             changed_tensile_high,
+#                                             changed_tensile_low])
+#     all_diameter_connected = np.concatenate([changed_diameter_up,
+#                                              changed_diameter_down,
+#                                              changed_diameter_high,
+#                                              changed_diameter_low])
+#     #     draw_two_figure(all_tensile_connected,all_diameter_connected,
+#     #                    'tensile strain',
+#     #                     'diameter','16_bar.png','tensile and cloud diameter','16 bar tensile strain and cloud diameter',
+#     #                     True)
+#
+#     return [roll_to_midi_0129(result_roll),
+#             z]
 
 
 
