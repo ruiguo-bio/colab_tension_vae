@@ -1,7 +1,15 @@
 import pretty_midi
 import numpy as np
 from params import *
+import pickle
 
+tensile_up_feature_vector = pickle.load(open('model/tensile_up_feature_vector','rb'))
+diameter_up_feature_vector = pickle.load(open('model/diameter_up_feature_vector','rb'))
+
+tensile_high_feature_vector = pickle.load(open('model/tensile_high_feature_vector','rb'))
+diameter_high_feature_vector = pickle.load(open('model/diameter_high_feature_vector','rb'))
+
+tensile_up_down_feature_vector = pickle.load(open('model/tensile_up_down_feature_vector','rb'))
 
 
 def beat_time(pm, beat_division=4):
