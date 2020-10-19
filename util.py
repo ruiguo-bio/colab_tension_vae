@@ -59,7 +59,6 @@ def roll_to_pretty_midi(rolls,pm_old):
                 if melody_pitch == melody_dim - 1 or melody_start or melody_pitch != previous_m_pitch or timestep == \
                         rolls.shape[0] - 1:
                     if previous_m_start:
-                        #                         print(f'melody note is {previous_m_pitch + 36}')
                         m_end_time = timestep * step_time
                         melody_notes.append(pretty_midi.Note(velocity=100, pitch=previous_m_pitch + 24,
                                                              start=m_start_time, end=m_end_time))
@@ -88,7 +87,7 @@ def roll_to_pretty_midi(rolls,pm_old):
                     if previous_b_start:
                         b_end_time = timestep * step_time
                         #                         print(f'bass pitch is {previous_b_pitch + 24}')
-                        bass_notes.append(pretty_midi.Note(velocity=100, pitch=previous_b_pitch + 24,
+                        bass_notes.append(pretty_midi.Note(velocity=100, pitch=previous_b_pitch + 36,
                                                            start=b_start_time, end=b_end_time))
                         previous_b_start = False
 

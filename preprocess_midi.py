@@ -14,7 +14,7 @@ def beat_time(pm, beat_division=4):
     divided_beats.append(beats[-1])
     down_beats = pm.get_downbeats()
     down_beat_indices = []
-    for down_beat in down_beats[:-1]:
+    for down_beat in down_beats:
         down_beat_indices.append(np.argwhere(divided_beats == down_beat)[0][0])
 
     return np.array(divided_beats),np.array(down_beat_indices)
@@ -42,7 +42,7 @@ def find_active_range(rolls, down_beat_indices):
     two_track_filled_bar = np.count_nonzero(track_filled[:2,:], axis=0) == 2
     filled_indices = []
 
-    for i in range(0,len(two_track_filled_bar)-interval,SLIDING_WINDOW):
+    for i in range(0,len(two_track_filled_bar)-interval+1,SLIDING_WINDOW):
         if np.sum(two_track_filled_bar[i:i+interval]) == interval:
             filled_indices.append((i,i+interval))
 
@@ -246,100 +246,65 @@ def preprocess_midi(midi_file):
 #                 continue
 #             tension_name = tension_name.replace('/home/data/guorui/', '')
 
-# def four_bar_interate(pianoroll, model, first_vector, second_vector, third_vector):
-#     number_of_iteration = pianoroll
-#     if pianoroll is None:
-#         z = np.random.normal(size=(1, z_dim))
-#     else:
-#         z = model.layers[1].predict(pianoroll)
-#     #     z = z-np.mean(z)
-#
-#
-#     changed_z_up = z + np.random.uniform(5, 7) * vector_up_t
-#
-#     changed_reconstruction_up = vae.layers[2].predict(changed_z_up)
-#
-#     changed_recon_result_up = result_sampling(np.concatenate(list(changed_reconstruction_up), axis=-1))[0]
-#
-#     changed_tensile_reconstruction_up = changed_reconstruction_up[-2]
-#     changed_diameter_reconstruction_up = changed_reconstruction_up[-1]
-#
-#     changed_tensile_up = np.squeeze(changed_tensile_reconstruction_up)
-#     changed_diameter_up = np.squeeze(changed_diameter_reconstruction_up)
-#
-#     #     draw_two_figure(tensile_reconstruction,changed_tensile_up,'original tensile',
-#     #                     'changed tensile','16bar_tensile_up.png','tensile strain','Tension shape going up',
-#     #                     True)
-#
-#     changed_z_down = z - random.uniform(5, 7) * vector_up_t
-#
-#     changed_reconstruction_down = vae.layers[2].predict(changed_z_down)
-#
-#     changed_recon_result_down = result_sampling(np.concatenate(list(changed_reconstruction_down), axis=-1))[0]
-#
-#     changed_tensile_reconstruction_down = changed_reconstruction_down[-2]
-#     changed_diameter_reconstruction_down = changed_reconstruction_down[-1]
-#     changed_tensile_down = np.squeeze(changed_tensile_reconstruction_down)
-#     changed_diameter_down = np.squeeze(changed_diameter_reconstruction_down)
-#
-#     #     draw_two_figure(tensile_reconstruction,changed_tensile_down,'original tensile',
-#     #                     'changed tensile','16bar_tensile_down.png','tensile strain','Tension shape going down',
-#     #                     True)
-#
-#     print(np.concatenate([changed_tensile_up, changed_tensile_down]).shape)
-#
-#     changed_z_high = z + random.uniform(3, 4) * vector_high_d + np.random.uniform(4, 6) * vector_up_t
-#
-#     changed_reconstruction_high = vae.layers[2].predict(changed_z_high)
-#
-#     changed_recon_result_high = result_sampling(np.concatenate(list(changed_reconstruction_high), axis=-1))[0]
-#
-#     changed_tensile_reconstruction_high = changed_reconstruction_high[-2]
-#
-#     changed_diameter_reconstruction_high = changed_reconstruction_high[-1]
-#
-#     changed_tensile_high = np.squeeze(changed_tensile_reconstruction_high)
-#
-#     changed_diameter_high = np.squeeze(changed_diameter_reconstruction_high)
-#
-#     #     draw_two_figure(diameter_reconstruction,changed_diameter_high,'original diameter',
-#     #                     'changed diameter','16bar_diameter_high.png','cloud diameter','Cloud diameter level high',
-#     #                     True)
-#
-#     changed_z_low = z - random.uniform(3, 4) * vector_high_d - np.random.uniform(4, 6) * vector_up_t
-#
-#     changed_reconstruction_low = vae.layers[2].predict(changed_z_low)
-#
-#     changed_recon_result_low = result_sampling(np.concatenate(list(changed_reconstruction_low), axis=-1))[0]
-#
-#     changed_tensile_reconstruction_low = changed_reconstruction_low[-2]
-#
-#     changed_diameter_reconstruction_low = changed_reconstruction_low[-1]
-#     changed_tensile_low = np.squeeze(changed_tensile_reconstruction_low)
-#
-#     changed_diameter_low = np.squeeze(changed_diameter_reconstruction_low)
-#
-#     #     draw_two_figure(diameter_reconstruction,changed_diameter_low,'original diameter',
-#     #                     'changed diameter','16bar_diameter_low.png','cloud diameter','Cloud diameter level low',
-#     #                     True)
-#
-#     result_roll = np.vstack([changed_recon_result_up, changed_recon_result_down,
-#                              changed_recon_result_high, changed_recon_result_low])
-#     all_tensile_connected = np.concatenate([changed_tensile_up,
-#                                             changed_tensile_down,
-#                                             changed_tensile_high,
-#                                             changed_tensile_low])
-#     all_diameter_connected = np.concatenate([changed_diameter_up,
-#                                              changed_diameter_down,
-#                                              changed_diameter_high,
-#                                              changed_diameter_low])
-#     #     draw_two_figure(all_tensile_connected,all_diameter_connected,
-#     #                    'tensile strain',
-#     #                     'diameter','16_bar.png','tensile and cloud diameter','16 bar tensile strain and cloud diameter',
-#     #                     True)
-#
-#     return [roll_to_midi_0129(result_roll),
-#             z]
+def four_bar_iterate(pianoroll, model, feature_vectors,
+                     factor_t,
+                     factor_d,
+                     first_up=True):
+    number_of_iteration = pianoroll.shape[0] // 128
+    result_roll = None
+    tensile_strain = None
+    diameter = None
 
+    for i in range(number_of_iteration):
 
+        random_selection = np.random.randint(0, len(feature_vectors))
+        feature_vector = feature_vectors[random_selection]
+        # print(f'feature vector number is {random_selection}')
+        if np.array_equal(feature_vector, tensile_up_feature_vector) or \
+                np.array_equal(feature_vector,tensile_up_down_feature_vector) or \
+                np.array_equal(feature_vector,tensile_high_feature_vector):
+            factor = factor_t
+            print('tensile change')
+        else:
+            factor = factor_d
+            print('diameter')
+
+        for j in range(2):
+
+            first_4_bar = 0 if j == 0 else 1
+            direction = 1 if j == 0 else -1
+            direction = -1 * direction if first_up is False else direction
+            start_time_step = 128 * i + 64 * first_4_bar
+            print(f'number_of_iteration is {i}')
+            # print(f'start_time_step is {start_time_step}')
+            # print(f'j is {j}')
+            input_roll = np.expand_dims(pianoroll[start_time_step:start_time_step + 64, :], 0)
+            # print(f'input shape is {input_roll.shape}')
+            z = model.layers[1].predict(input_roll)
+            curr_factor = direction * (np.random.uniform(-1, 1) + factor)
+            print(f'factor is {curr_factor}')
+            z_new = z + curr_factor * feature_vector
+            reconstruction_new = model.layers[2].predict(z_new)
+            result_new = util.result_sampling(np.concatenate(list(reconstruction_new), axis=-1))[0]
+            tensile_new = np.squeeze(reconstruction_new[-2])
+            diameter_new = np.squeeze(reconstruction_new[-1])
+
+            if result_roll is None:
+                result_roll = result_new
+                tensile_strain = tensile_new
+                diameter = diameter_new
+            else:
+                result_roll = np.vstack([result_roll, result_new])
+                tensile_strain = np.concatenate([tensile_strain, tensile_new])
+                diameter = np.concatenate([diameter, diameter_new])
+
+            # print(f'result roll shape is {result_roll.shape}')
+            # print(f'tensile_strain shape is {tensile_strain.shape}')
+            # print(f'diameter shape is {diameter.shape}')
+            # print('\n')
+
+    start_time_step = 128 * (i + 1)
+    result_roll = np.vstack([result_roll, pianoroll[start_time_step:, :]])
+
+    return result_roll, tensile_strain, diameter
 
