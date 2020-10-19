@@ -2,6 +2,7 @@ import pretty_midi
 import numpy as np
 from params import *
 import pickle
+import util
 
 tensile_up_feature_vector = pickle.load(open('model/tensile_up_feature_vector','rb'))
 diameter_up_feature_vector = pickle.load(open('model/diameter_up_feature_vector','rb'))
